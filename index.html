@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ice Strike Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 15px;
+            background-color: #f0f0f0;
+        }
+        
+        th, td {
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #e0e0e0;
+        }
+        
+        .conversion-box {
+            background-color: #f0f0f0;
+            border: 1px solid #999;
+            padding: 6px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        input[type="number"] {
+            width: 60px;
+        }
+        
+        .blue-text {
+            color: #0066cc;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+        
+        .small-table {
+            width: auto;
+        }
+        
+        .note {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .side-note {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .light-blue-bg {
+            background-color: #e6f3ff;
+        }
+
+        .import-export {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #f0f0f0;
+            padding: 15px;
+            border: 1px solid #999;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .import-export textarea {
+            width: 300px;
+            height: 100px;
+            margin: 10px 0;
+        }
+        
+        .import-export button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .toggle-import-export {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skill: Ice Strike</h1>
+    
+    <div class="grid-container">
+        <div>
+            <table>
+                <tr>
+                    <th>Base Damage from Equipment</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Source</th>
+                </tr>
+                <tr>
+                    <td>Physical</td>
+                    <td><input type="number" id="physMin" value="209" onchange="calculate()"></td>
+                    <td><input type="number" id="physMax" value="419" onchange="calculate()"></td>
+                    <td>weapon + gloves</td>
+                </tr>
+                <tr>
+                    <td>Cold</td>
+                    <td><input type="number" id="coldMin" value="15" onchange="calculate()"></td>
+                    <td><input type="number" id="coldMax" value="27" onchange="calculate()"></td>
+                    <td>ring</td>
+                </tr>
+                <tr>
+                    <td>Lightning</td>
+                    <td><input type="number" id="lightMin" value="1" onchange="calculate()"></td>
+                    <td><input type="number" id="lightMax" value="6" onchange="calculate()"></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <!-- <div class="conversion-box">
+                Physical to Cold conversion: <input type="number" id="conversion" value="80" onchange="calculate()">%
+            </div> -->
+
+            <table>
+                <tr>
+                    <th>Base Damage Post Conversion</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                </tr>
+                <tr id="postConversionPhys"></tr>
+                <tr id="postConversionCold"></tr>
+                <tr id="postConversionLight"></tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th>Damage Post Modifiers</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                </tr>
+                <tr id="postModPhys"></tr>
+                <tr id="postModCold"></tr>
+                <tr id="postModLight"></tr>
+                <tr id="extraCold"></tr>
+                <tr id="extraLight"></tr>
+                <tr class="total-row" id="totalDamage"></tr>
+            </table>
+
+            <table class="small-table">
+                <tr id="avgDamage"></tr>
+                <tr id="avgDPS"></tr>
+            </table>
+        </div>
+
+        <div>
+            <table>
+                <tr>
+                    <th colspan="2">Skill Data</th>
+                </tr>
+                <tr>
+                    <td>Skill Attack Damage Conversion</td>
+                    <td><input type="number" id="skillattackDmg" value="203" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Physical to Cold conversion</td>
+                    <td id="conversion">80%</td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th colspan="2">Attack Speed</th>
+                </tr>
+                <tr>
+                    <td>Skill Attack Speed</td>
+                    <td><input type="number" id="skillSpeed" value="140" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Weapon Base attacks/second</td>
+                    <td><input type="number" id="weaponSpeed" value="1.5" onchange="calculate()"></td>
+                </tr>
+                <tr>
+                    <td>Attack Speed (Passive Tree)</td>
+                    <td><input type="number" id="passiveSpeed" value="46" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Attack Speed (Elsewhere)</td>
+                    <td><input type="number" id="elsewhereSpeed" value="0" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Hits per second</td>
+                    <td id="hitsPerSecond">3.6</td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th colspan="2">Other % Increased Dmg Modifiers</th>
+                </tr>
+                <tr>
+                    <td>Attack Damage (passive tree)</td>
+                    <td><input type="number" id="attackDmg" value="75" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Elemental</td>
+                    <td><input type="number" id="elemental" value="30" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Cold Damage</td>
+                    <td><input type="number" id="coldDmg" value="46" onchange="calculate()">%</td>
+                </tr>
+            </table>
+        </div>
+
+
+        <div>
+            <table>
+                <tr>
+                    <th colspan="1">Total Crit Modifier</th>
+                    <td id="totalCritMod"></td>
+                </tr>
+                <tr>
+                    <td>Weapon Crit Chance</td>
+                    <td class="light-blue-bg"><input type="number" id="weaponCC" value="3.77" onchange="calculate()">%</td>
+                </tr>
+                <tr>
+                    <td>Weapon Crit Damage</td>
+                    <td class="light-blue-bg"><input type="number" id="weaponCD" value="23" onchange="calculate()">%</td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th colspan="2">Total Crit Chance</th>
+                    <td id="totalCC"></td>
+                </tr>
+                <tr>
+                    <td>Base Crit Chance</td>
+                    <td>11.00%</td>
+                    <td class="side-note">plus 1 from passive tree</td>
+                </tr>
+                <tr>
+                    <td>Passive Tree Crit Chance</td>
+                    <td class="light-blue-bg"><input type="number" id="passiveCC" value="216" onchange="calculate()">%</td>
+                    <td class="side-note">Remember ascendancy</td>
+                </tr>
+                <tr>
+                    <td>Other Sources of Crit Chance</td>
+                    <td class="light-blue-bg"><input type="number" id="otherCC" value="31" onchange="calculate()">%</td>
+                    <td class="side-note">e.g. Amulet/Ring</td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th colspan="2">Total Crit Damage</th>
+                    <td id="totalCD"></td>
+                </tr>
+                <tr>
+                    <td>Base Crit Damage</td>
+                    <td>100%</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Passive Tree Crit Damage</td>
+                    <td class="light-blue-bg"><input type="number" id="passiveCD" value="270" onchange="calculate()">%</td>
+                    <td class="side-note">Can be another 25% conditionally from passive node</td>
+                </tr>
+                <tr>
+                    <td>Other sources of Crit Damage</td>
+                    <td class="light-blue-bg"><input type="number" id="otherCD" value="15" onchange="calculate()">%</td>
+                    <td class="side-note">Gloves/Jewels</td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <table>
+                <tr>
+                    <th>Gems</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td>Martial Tempo</td>
+                    <td>
+                        <select id="martialTempo" onchange="calculate()">
+                            <option value="false">FALSE</option>
+                            <option value="true">TRUE</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>25% Elem dmg</td>
+                    <td class="light-blue-bg">FALSE</td>
+                </tr>
+                <tr>
+                    <td>40% Area dmg</td>
+                    <td class="light-blue-bg">FALSE</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <p class="note">Note: attack speed is broken right now, to calculate dps just do dmg * hits per second on tooltip</p>
+    <p class="note">Note: percentage extra damage as lightning / cold is under by a little bit</p>
+
+    <button class="toggle-import-export" onclick="toggleImportExport()">Import/Export Data</button>
+    
+    <div id="importExportPanel" class="import-export" style="display: none;">
+        <h3>Import/Export Data</h3>
+        <textarea id="importExportData" placeholder="Paste data here to import, or copy current data to clipboard"></textarea>
+        <div>
+            <button onclick="exportData()">Export Current Values</button>
+            <button onclick="importData()">Import Values</button>
+            <button onclick="toggleImportExport()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get base values
+            const physMin = parseFloat(document.getElementById('physMin').value);
+            const physMax = parseFloat(document.getElementById('physMax').value);
+            const coldMin = parseFloat(document.getElementById('coldMin').value);
+            const coldMax = parseFloat(document.getElementById('coldMax').value);
+            const lightMin = parseFloat(document.getElementById('lightMin').value);
+            const lightMax = parseFloat(document.getElementById('lightMax').value);
+            const conversion = 80 / 100;
+
+            // Calculate post conversion values
+            const postConvPhysMin = physMin * (1 - conversion);
+            const postConvPhysMax = physMax * (1 - conversion);
+            const postConvColdMin = (physMin * conversion) + coldMin;
+            const postConvColdMax = (physMax * conversion) + coldMax;
+            
+            // Update post conversion table
+            document.getElementById('postConversionPhys').innerHTML = `
+                <td>Physical</td>
+                <td>${postConvPhysMin.toFixed(1)}</td>
+                <td>${postConvPhysMax.toFixed(1)}</td>
+            `;
+            document.getElementById('postConversionCold').innerHTML = `
+                <td>Cold</td>
+                <td>${postConvColdMin.toFixed(1)}</td>
+                <td>${postConvColdMax.toFixed(1)}</td>
+            `;
+            document.getElementById('postConversionLight').innerHTML = `
+                <td>Lightning</td>
+                <td>${lightMin}</td>
+                <td>${lightMax}</td>
+            `;
+
+            // Get modifiers
+            const skillattackDmg = parseFloat(document.getElementById('skillattackDmg').value) / 100;
+            const attackDmg = parseFloat(document.getElementById('attackDmg').value) / 100;
+            const elemental = parseFloat(document.getElementById('elemental').value) / 100;
+            const coldDmg = parseFloat(document.getElementById('coldDmg').value) / 100;
+
+            // Calculate post modifier values
+            const modPhysMin = postConvPhysMin * skillattackDmg * (1 + attackDmg);
+            const modPhysMax = postConvPhysMax * skillattackDmg * (1 + attackDmg);
+            const modColdMin = postConvColdMin * skillattackDmg * (1 + attackDmg + elemental + coldDmg);
+            const modColdMax = postConvColdMax * skillattackDmg * (1 + attackDmg + elemental + coldDmg);
+            const modLightMin = lightMin * skillattackDmg * (1 + attackDmg + elemental);
+            const modLightMax = lightMax * skillattackDmg * (1 + attackDmg + elemental);
+
+            // Extra damage calculations
+            const extraColdMin = modColdMin * 0.1;
+            const extraColdMax = modColdMax * 0.1;
+            const extraLightMin = modColdMin * 0.1;
+            const extraLightMax = modColdMax * 0.1;
+
+            // Update post modifiers table
+            document.getElementById('postModPhys').innerHTML = `
+                <td>Physical</td>
+                <td>${modPhysMin.toFixed(1)}</td>
+                <td>${modPhysMax.toFixed(1)}</td>
+            `;
+            document.getElementById('postModCold').innerHTML = `
+                <td>Cold</td>
+                <td>${modColdMin.toFixed(1)}</td>
+                <td>${modColdMax.toFixed(1)}</td>
+            `;
+            document.getElementById('postModLight').innerHTML = `
+                <td>Lightning</td>
+                <td>${modLightMin.toFixed(4)}</td>
+                <td>${modLightMax.toFixed(4)}</td>
+            `;
+            document.getElementById('extraCold').innerHTML = `
+                <td>Extra Cold (Asc)</td>
+                <td>${extraColdMin.toFixed(4)}</td>
+                <td>${extraColdMax.toFixed(4)}</td>
+            `;
+            document.getElementById('extraLight').innerHTML = `
+                <td>Extra Lightning (Asc)</td>
+                <td>${extraLightMin.toFixed(4)}</td>
+                <td>${extraLightMax.toFixed(4)}</td>
+            `;
+
+            // Calculate totals
+            const totalMin = modPhysMin + modColdMin + modLightMin + extraColdMin + extraLightMin;
+            const totalMax = modPhysMax + modColdMax + modLightMax + extraColdMax + extraLightMax;
+
+            document.getElementById('totalDamage').innerHTML = `
+                <td>Total Damage</td>
+                <td>${totalMin.toFixed(1)}</td>
+                <td>${totalMax.toFixed(1)}</td>
+            `;
+
+            // Crit modifiers
+            const weaponCC = parseFloat(document.getElementById('weaponCC').value) / 100;
+            const weaponCD = parseFloat(document.getElementById('weaponCD').value) / 100;
+            const passiveCC = parseFloat(document.getElementById('passiveCC').value) / 100;
+            const passiveCD = parseFloat(document.getElementById('passiveCD').value) / 100;
+            const otherCC = parseFloat(document.getElementById('otherCC').value) / 100;
+            const otherCD = parseFloat(document.getElementById('otherCD').value) / 100;
+
+            const totalCC = (11/100 + weaponCC) * (1 + passiveCC + otherCC);
+            const totalCD = (1 + weaponCD) * (1 + passiveCD + otherCD);
+            const totalCritMod = 1 + totalCC * totalCD
+
+            document.getElementById('totalCC').textContent = (totalCC * 100).toFixed(2) + '%';
+            document.getElementById('totalCD').textContent = (totalCD * 100).toFixed(2) + '%';
+            document.getElementById('totalCritMod').textContent = (totalCritMod * 100).toFixed(2) + '%';
+
+            // Calculate averages
+            const avgDamage = (totalMin + totalMax) / 2;
+            
+            // Calculate hits per second
+            const skillSpeed = parseFloat(document.getElementById('skillSpeed').value) / 100;
+            const weaponSpeed = parseFloat(document.getElementById('weaponSpeed').value);
+            const passiveSpeed = parseFloat(document.getElementById('passiveSpeed').value) / 100;
+            const elsewhereSpeed = parseFloat(document.getElementById('elsewhereSpeed').value) / 100;
+            const martialTempo = document.getElementById('martialTempo').value === 'true';
+            
+            // const hitsPerSecond = skillSpeed * weaponSpeed * (1 + passiveSpeed + elsewhereSpeed) * (martialTempo ? 1.25 : 1);
+            const hitsPerSecond = 3.6
+            
+            document.getElementById('hitsPerSecond').textContent = hitsPerSecond.toFixed(2);
+            
+            // Calculate DPS
+            const dps = avgDamage * hitsPerSecond * totalCritMod;
+
+            // Update averages table
+            document.getElementById('avgDamage').innerHTML = `
+                <td>Average Damage</td>
+                <td>${avgDamage.toFixed(1)}</td>
+            `;
+            document.getElementById('avgDPS').innerHTML = `
+                <td>Average DPS</td>
+                <td>${dps.toFixed(1)}</td>
+            `;
+        }
+
+        // Initial calculation
+        calculate();
+
+        // Add Import/Export functionality
+        function getAllInputValues() {
+            const inputs = document.querySelectorAll('input[type="number"], select');
+            const values = {};
+            
+            inputs.forEach(input => {
+                values[input.id] = input.type === 'number' ? parseFloat(input.value) : input.value;
+            });
+            
+            return values;
+        }
+        
+        function setAllInputValues(values) {
+            for (const [id, value] of Object.entries(values)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (element.type === 'number') {
+                        element.value = value;
+                    } else if (element.tagName === 'SELECT') {
+                        element.value = value;
+                    }
+                }
+            }
+            calculate(); // Recalculate after importing values
+        }
+        
+        function exportData() {
+            const values = getAllInputValues();
+            const jsonStr = JSON.stringify(values, null, 2);
+            const textarea = document.getElementById('importExportData');
+            textarea.value = jsonStr;
+            
+            // Copy to clipboard
+            textarea.select();
+            document.execCommand('copy');
+            
+            alert('Data exported and copied to clipboard!');
+        }
+        
+        function importData() {
+            try {
+                const textarea = document.getElementById('importExportData');
+                const values = JSON.parse(textarea.value);
+                setAllInputValues(values);
+                alert('Data imported successfully!');
+            } catch (e) {
+                alert('Error importing data. Please check the format.');
+                console.error(e);
+            }
+        }
+        
+        function toggleImportExport() {
+            const panel = document.getElementById('importExportPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
