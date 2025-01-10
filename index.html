@@ -464,9 +464,8 @@
             const elsewhereSpeed = parseFloat(document.getElementById('elsewhereSpeed').value) / 100;
             const martialTempo = document.getElementById('martialTempo').value === 'true';
             
-            // const hitsPerSecond = skillSpeed * weaponSpeed * (1 + passiveSpeed + elsewhereSpeed) * (martialTempo ? 1.25 : 1);
-            const hitsPerSecond = 3.6
-            
+            const hitsPerSecond = skillSpeed * weaponSpeed * (1 + passiveSpeed + elsewhereSpeed) * (martialTempo ? 1.25 : 1);
+
             document.getElementById('hitsPerSecond').textContent = hitsPerSecond.toFixed(2);
             
             // Calculate DPS
