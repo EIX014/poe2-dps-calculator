@@ -311,8 +311,8 @@
                     <th></th>
                 </tr>
                 <tr>
-                    <td>Martial Tempo</td>
-                    <td>
+                    <td>Martial Tempo: 25% AS</td>
+                    <td class="light-blue-bg">
                         <select id="martialTempo" onchange="calculate()">
                             <option value="false">FALSE</option>
                             <option value="true">TRUE</option>
@@ -320,8 +320,28 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>25% Elem dmg</td>
+                    <td>Primal Armament: 25% Elem dmg</td>
+                    <td class="light-blue-bg">
+                        <select id="primalArmament" onchange="calculate()">
+                            <option value="false">FALSE</option>
+                            <option value="true">TRUE</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Heft: 30% max phys dmg</td>
+                    <td class="light-blue-bg">
+                        <select id="heft" onchange="calculate()">
+                            <option value="false">FALSE</option>
+                            <option value="true">TRUE</option>
+                        </select>
+                    </td>
+                    <td class="side-note">situationally good if high max phys on weap</td>
+                </tr>
+                <tr>
+                    <td>40% Area dmg</td>
                     <td class="light-blue-bg">FALSE</td>
+                    <td class="side-note">flat 40% more damage</td>
                 </tr>
                 <tr>
                     <td>40% Area dmg</td>
@@ -351,12 +371,16 @@
         function calculate() {
             // Get base values
             const physMin = parseFloat(document.getElementById('physMin').value);
-            const physMax = parseFloat(document.getElementById('physMax').value);
+            var physMax = parseFloat(document.getElementById('physMax').value);
             const coldMin = parseFloat(document.getElementById('coldMin').value);
             const coldMax = parseFloat(document.getElementById('coldMax').value);
             const lightMin = parseFloat(document.getElementById('lightMin').value);
             const lightMax = parseFloat(document.getElementById('lightMax').value);
             const conversion = 80 / 100;
+
+            const heft = document.getElementById('heft').value === 'true';
+
+            physMax = physMax * (heft ? 1.3 : 1);
 
             // Calculate post conversion values
             const postConvPhysMin = physMin * (1 - conversion);
@@ -387,13 +411,15 @@
             const elemental = parseFloat(document.getElementById('elemental').value) / 100;
             const coldDmg = parseFloat(document.getElementById('coldDmg').value) / 100;
 
+            const primalArmament = document.getElementById('primalArmament').value === 'true';
+
             // Calculate post modifier values
             const modPhysMin = postConvPhysMin * skillattackDmg * (1 + attackDmg);
             const modPhysMax = postConvPhysMax * skillattackDmg * (1 + attackDmg);
-            const modColdMin = postConvColdMin * skillattackDmg * (1 + attackDmg + elemental + coldDmg);
-            const modColdMax = postConvColdMax * skillattackDmg * (1 + attackDmg + elemental + coldDmg);
-            const modLightMin = lightMin * skillattackDmg * (1 + attackDmg + elemental);
-            const modLightMax = lightMax * skillattackDmg * (1 + attackDmg + elemental);
+            const modColdMin = postConvColdMin * skillattackDmg * (1 + attackDmg + elemental + coldDmg) * (primalArmament ? 1.25 : 1);
+            const modColdMax = postConvColdMax * skillattackDmg * (1 + attackDmg + elemental + coldDmg) * (primalArmament ? 1.25 : 1);
+            const modLightMin = lightMin * skillattackDmg * (1 + attackDmg + elemental) * (primalArmament ? 1.25 : 1);
+            const modLightMax = lightMax * skillattackDmg * (1 + attackDmg + elemental) * (primalArmament ? 1.25 : 1);
 
             // Extra damage calculations
             const extraColdMin = modColdMin * 0.1;
